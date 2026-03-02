@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pitch, please! - YCKC Language Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary: #ff4081;
+    --primary-hover: #e91e63;
+    --secondary: #007bff;
+    --bg-card: rgba(255, 255, 255, 0.95);
+  }
+
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ff69b4 0%, #ff8da1 25%, #ffb6c1 50%, #ffe77a 75%, #ffd700 100%);
+    background-size: 400% 400%;
+    animation: smoothGradient 15s ease infinite;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  @keyframes smoothGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  #bubblesContainer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; overflow: hidden; z-index: -1;
+  }
+  .bubble {
+    position: absolute; bottom: 0; background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 50%; opacity: 0; animation: rise 15s linear forwards;
+  }
+  @keyframes rise {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+  }
+
+  /* --- PAGE TRANSITIONS (MERGE / DISSOLVE EFFECT) --- */
+  .page {
+    display: none; 
+    padding: clamp(20px, 5vw, 40px); 
+    min-height: 100vh;
+    box-sizing: border-box; 
+    align-items: center; 
+    justify-content: center; 
+    flex-direction: column;
+    opacity: 0; 
+    filter: blur(10px); 
+    transform: scale(1.02); 
+    transition: opacity 0.4s ease-in-out, filter 0.4s ease-in-out, transform 0.4s ease-in-out;
+  }
+  .page.active {
+    display: flex; 
+  }
+
+  .title-frame {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px); border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px; padding: 30px 40px; text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); margin-bottom: 20px;
+    width: 100%; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .school-heading { font-size: clamp(1.2em, 2.5vw, 1.5em); color: #333; font-weight: 700; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+  .centre-heading { font-size: clamp(1em, 2vw, 1.2em); color: #444; font-weight: 600; margin: 0; border-bottom: 2px solid #fff; padding-bottom: 5px; }
+  #mainTitle { font-family: 'Noto Serif Display', serif; font-size: clamp(3em, 8vw, 5em); margin: 0; padding: 10px 0; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); }
+  p.landing-desc { font-size: clamp(1.1em, 2vw, 1.3em); text-align: center; line-height: 1.6; max-width: 600px; margin: 15px auto; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-weight: 600; }
+  
+  .sparkle { position: absolute; font-size: clamp(1.5em, 4vw, 2.5em); animation: sparkleAnim 1.5s infinite; }
+  @keyframes sparkleAnim { 0%, 100% {opacity: 1; transform: scale(1);} 50% {opacity: 0.5; transform: scale(1.2);} }
+
+  button { font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; border: none; border-radius: 12px; transition: all 0.3s; }
+  .btn-primary { background-color: var(--primary); color: #fff; padding: 15px 30px; font-size: clamp(1.1em, 2vw, 1.3em); box-shadow: 0 6px 15px rgba(255, 64, 129, 0.4); margin-top: 20px; }
+  .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 64, 129, 0.6); }
+  
+  .btn-secondary { background-color: #f39c12; color: #fff; padding: 15px 30px; font-size: clamp(1.1em, 2vw, 1.3em); box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4); }
+  .btn-secondary:hover { background-color: #e67e22; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(243, 156, 18, 0.6); }
+
+  .card-container { background: var(--bg-card); border-radius: 20px; padding: clamp(20px, 5vw, 40px); width: 100%; max-width: 750px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); box-sizing: border-box; text-align: left; }
+  .card-container h2 { color: var(--primary); margin-top: 0; text-align: center; font-size: 1.8em; }
+
+  .story-so-far { background: #fdfdfd; border: 2px dashed #ccc; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; font-size: 1.1em; line-height: 1.6; color: #555; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+  .story-so-far .completed-text { color: #333; }
+  .story-so-far .current-building { color: var(--primary); font-weight: bold; background: #ffe4e1; padding: 2px 6px; border-radius: 4px;}
+  .story-title { font-size: 0.9em; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; display: block; }
+
+  .wizard-header { margin-bottom: 20px; text-align: center; }
+  .stage-title { font-size: 1.2em; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .prompt-title { font-size: 1.4em; color: #333; font-weight: 600; margin-top: 0; }
+
+  .progress-bg { background: #e0e0e0; height: 12px; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #3399ff, #66ff66); height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+  .options-grid { display: flex; flex-direction: column; gap: 12px; }
+  .pattern-btn { background: #f8f9fa; border: 2px solid #e9ecef; color: #333; padding: 18px 20px; text-align: left; font-size: 1.1em; border-radius: 12px; line-height: 1.5; }
+  .pattern-btn:hover { background: #fff; border-color: var(--primary); transform: translateX(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .pattern-btn span.blank-spot { color: var(--primary); font-weight: bold; text-decoration: underline; }
+
+  .choices-wrapper { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .choice-btn { padding: 12px 20px; font-size: 1.1em; border-radius: 8px; border: 2px solid rgba(0,0,0,0.1); background: #fff; color: #333; font-weight: 600; min-width: 100px; }
+  .choice-btn:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+
+  .input-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+  input[type="text"] { width: 90%; max-width: 400px; padding: 15px; font-size: 1.2em; border: 2px solid #ccc; border-radius: 10px; text-align: center; font-family: 'Poppins', sans-serif; }
+  input[type="text"]:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 8px rgba(0,123,255,0.3); }
+  .btn-submit { background: var(--secondary); color: white; padding: 12px 30px; font-size: 1.1em; margin-top: 10px; }
+  .btn-submit:hover { background: #0056b3; transform: translateY(-2px); }
+
+  #finalParagraph { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); font-size: clamp(1.1em, 2vw, 1.3em); line-height: 1.8; color: #333; width: 100%; box-sizing: border-box; text-align: left; margin-bottom: 25px; border-left: 8px solid var(--primary); word-wrap: break-word; }
+
+  /* --- EXPRESSIONS PAGE STYLES --- */
+  .exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .exp-card { background: #fff; padding: 25px; border-radius: 12px; border-top: 5px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+  .exp-card h3 { margin-top: 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 1.2em; display: flex; align-items: center; gap: 8px; }
+  .exp-section-title { font-weight: bold; color: var(--secondary); margin-top: 15px; margin-bottom: 5px; font-size: 1.05em; }
+  .exp-card ul { margin: 0; padding-left: 20px; color: #555; line-height: 1.8; margin-bottom: 15px; }
+  
+  .vocab-list { display: flex; flex-direction: column; gap: 8px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+  .vocab-item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #ddd; padding-bottom: 5px; }
+  .vocab-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .vocab-en { font-weight: bold; color: var(--primary); font-size: 1.1em; }
+  .vocab-zh { color: #666; font-size: 0.95em; margin-left: 10px; flex-grow: 1; }
+  .btn-audio { background: #e0e0e0; border: none; padding: 5px 10px; border-radius: 20px; font-size: 1em; cursor: pointer; transition: all 0.2s; }
+  .btn-audio:hover { background: #d0d0d0; transform: scale(1.1); }
+
+  #padletLink a { color: var(--primary); text-decoration: none; font-weight: bold; font-size: 1.2em; }
+  #padletLink a:hover { text-decoration: underline; }
+
+</style>
+</head>
+<body>
+
+<div id="bubblesContainer"></div>
+
+<!-- ================= 1. LANDING PAGE ================= -->
+<div id="landingPage" class="page active">
+  <div class="title-frame">
+    <h2 class="school-heading">YCKC Open Day 2026</h2>
+    <h3 class="centre-heading">Language Centre</h3>
+    <div style="position: relative; display: inline-block; margin-top: 10px;">
+      <div class="sparkle" style="top:-10px; left:-20px; animation-delay:0s;">✨</div>
+      <div class="sparkle" style="top:-10px; right:-20px; animation-delay:0.3s;">✨</div>
+      <div class="sparkle" style="bottom:10px; left:-20px; animation-delay:0.6s;">✨</div>
+      <div class="sparkle" style="bottom:10px; right:-20px; animation-delay:0.9s;">✨</div>
+      <h1 id="mainTitle">Pitch, please!</h1>
+    </div>
+  </div>
+  <p class="landing-desc">Welcome, designers! 👜<br>Ready to write a professional pitch for your tote bag design?</p>
+  <button class="btn-primary" onclick="showPage('samplePage')">Read Instructions 📖</button>
+</div>
+
+<!-- ================= 2. SAMPLE PAGE ================= -->
+<div id="samplePage" class="page">
+  <div class="card-container">
+    <h2>📝 How It Works</h2>
+    <p>In the next few steps, you will build your presentation paragraph (a "Pitch").<br>We will give you <strong>sentence options</strong>, and you just need to fill in the missing details about your bag!</p>
+    
+    <div style="background: #eef2f5; padding: 15px; border-radius: 10px; border-left: 5px solid #28a745; margin: 20px 0;">
+      <h3 style="margin-top:0; color:#28a745;">💡 Sample Pitch:</h3>
+      <p style="font-style: italic; font-size:1.1em;">"The main <strong>colour</strong> I chose for this bag is <strong>white</strong>. To make it unique, I have added '<strong>Alex</strong>' as a personal touch. One of the key features is <strong>an orange</strong> <strong>tiger</strong> patch. It is placed <strong>in the centre</strong>. I chose this design because <strong>it looks energetic</strong>."</p>
+    </div>
+
+    <div style="text-align: center; margin-top:20px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+      <button class="btn-secondary" style="font-size: 1em; padding: 10px 20px;" onclick="showPage('expressionsPage')">📚 Learn Vocabulary First</button>
+      <p style="font-weight: bold; margin: 10px 0;">Or if you are ready to create yours 🤩</p>
+      <button class="btn-primary" style="margin-top: 0;" onclick="startWizard()">Let's Start Writing! ✍️</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 3. WIZARD PAGE ================= -->
+<div id="wizardPage" class="page">
+  <div class="card-container" id="wizardCard">
+    <div class="progress-bg"><div id="progressBar" class="progress-fill"></div></div>
+    
+    <div class="story-so-far" id="storyBox" style="display: none;">
+      <span class="story-title">📝 Your Pitch So Far:</span>
+      <span id="completedStory" class="completed-text"></span>
+      <span id="currentStory" class="current-building"></span>
+    </div>
+
+    <div class="wizard-header">
+      <div id="stageTitle" class="stage-title">Stage 1</div>
+      <h2 id="promptTitle" class="prompt-title">Question goes here?</h2>
+    </div>
+    
+    <div id="optionsArea"></div>
+  </div>
+</div>
+
+<!-- ================= 4. FINAL PAGE ================= -->
+<div id="finalPage" class="page">
+  <h1 style="color:#fff; text-shadow: 2px 2px 4px #000; text-align:center; margin-bottom:10px;">🎉 Masterpiece Completed! ✨</h1>
+  <p style="margin-top:0; color:#fff; font-weight:600; text-shadow: 1px 1px 2px #000;">Copy your pitch below and upload it to Padlet with a photo of your bag! 📸</p>
+  
+  <div id="finalParagraph"></div>
+  
+  <div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; align-items:center;">
+    <button id="copyBtn" class="btn-primary" style="margin-top:0;" onclick="copyText()">📋 Copy to Clipboard</button>
+    <button class="btn-secondary" onclick="showPage('expressionsPage')">📚 View Useful Expressions</button>
+    <button onclick="location.reload()" style="padding: 15px 30px; font-size: 1.1em; background-color: #ffc107; color: #000; font-weight: bold; border:none; border-radius:12px; cursor:pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.2);">
+      🔄 Restart
+    </button>
+  </div>
+
+  <div id="padletLink" style="margin-top:25px; background:rgba(255,255,255,0.95); padding:15px 30px; border-radius:30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+    <a href="https://padlet.com/misslouisefung/yckc-marketplace-23y1i90n28hp24y7" target="_blank">🔗 Upload to our Padlet Here</a>
+  </div>
+</div>
+
+<!-- ================= 5. EXPRESSIONS & VOCABULARY PAGE ================= -->
+<div id="expressionsPage" class="page">
+  <div class="card-container" style="max-width: 950px; background: #fdf5e6; border: 3px dashed #ffa500;">
+    <h2 style="color: #d2691e; display: flex; align-items: center; justify-content: center; gap: 10px;">🎒 Useful Expressions & Vocabulary</h2>
+    <p style="text-align: center; color: #666; margin-bottom: 25px;">Take these words and sentence patterns away for your next design pitch!</p>
+    
+    <div class="exp-grid">
+      <div class="exp-card" style="border-color: #ff4081;">
+        <h3>🎨 1. Colours & Base</h3>
+        <div class="exp-section-title">📝 Sentence Patterns:</div>
+        <ul>
+          <li>The main colour I chose is...</li>
+          <li>It is designed in a classic...</li>
+        </ul>
+        <div class="exp-section-title">💡 Vocabulary:</div>
+        <div class="vocab-list">
+          <div class="vocab-item"><span class="vocab-en">vibrant</span><span class="vocab-zh">鮮艷的</span><button class="btn-audio" onclick="playAudio('vibrant')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">pastel</span><span class="vocab-zh">粉彩/柔和的</span><button class="btn-audio" onclick="playAudio('pastel')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">neutral</span><span class="vocab-zh">中性的</span><button class="btn-audio" onclick="playAudio('neutral')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">classic</span><span class="vocab-zh">經典的</span><button class="btn-audio" onclick="playAudio('classic')">🔊</button></div>
+        </div>
+      </div>
+      
+      <div class="exp-card" style="border-color: #007bff;">
+        <h3>🌟 2. Highlighting Features</h3>
+        <div class="exp-section-title">📝 Sentence Patterns:</div>
+        <ul>
+          <li>One of the key features is...</li>
+          <li>To make it stand out, I included...</li>
+        </ul>
+        <div class="exp-section-title">💡 Vocabulary:</div>
+        <div class="vocab-list">
+          <div class="vocab-item"><span class="vocab-en">feature</span><span class="vocab-zh">特色</span><button class="btn-audio" onclick="playAudio('feature')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">stand out</span><span class="vocab-zh">突出/搶眼</span><button class="btn-audio" onclick="playAudio('stand out')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">unique</span><span class="vocab-zh">獨特的</span><button class="btn-audio" onclick="playAudio('unique')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">patch</span><span class="vocab-zh">布貼/襟章</span><button class="btn-audio" onclick="playAudio('patch')">🔊</button></div>
+        </div>
+      </div>
+
+      <div class="exp-card" style="border-color: #28a745;">
+        <h3>📍 3. Talking About Locations</h3>
+        <div class="exp-section-title">📝 Sentence Patterns:</div>
+        <ul>
+          <li>It is placed in the centre.</li>
+          <li>You can find it located on the left.</li>
+        </ul>
+        <div class="exp-section-title">💡 Vocabulary:</div>
+        <div class="vocab-list">
+          <div class="vocab-item"><span class="vocab-en">centre</span><span class="vocab-zh">正中間</span><button class="btn-audio" onclick="playAudio('centre')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">corner</span><span class="vocab-zh">角落</span><button class="btn-audio" onclick="playAudio('corner')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">strap</span><span class="vocab-zh">手挽帶</span><button class="btn-audio" onclick="playAudio('strap')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">bottom</span><span class="vocab-zh">底部</span><button class="btn-audio" onclick="playAudio('bottom')">🔊</button></div>
+        </div>
+      </div>
+
+      <div class="exp-card" style="border-color: #9c27b0;">
+        <h3>🤔 4. Giving Reasons (Adjectives)</h3>
+        <div class="exp-section-title">📝 Sentence Patterns:</div>
+        <ul>
+          <li>I chose this design because it looks...</li>
+          <li>This design is special to me because...</li>
+        </ul>
+        <div class="exp-section-title">💡 Vocabulary:</div>
+        <div class="vocab-list">
+          <div class="vocab-item"><span class="vocab-en">energetic</span><span class="vocab-zh">有活力的</span><button class="btn-audio" onclick="playAudio('energetic')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">creative</span><span class="vocab-zh">有創意的</span><button class="btn-audio" onclick="playAudio('creative')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">professional</span><span class="vocab-zh">專業的</span><button class="btn-audio" onclick="playAudio('professional')">🔊</button></div>
+          <div class="vocab-item"><span class="vocab-en">calm</span><span class="vocab-zh">平靜的</span><button class="btn-audio" onclick="playAudio('calm')">🔊</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
+      <button class="btn-primary" onclick="showPage('samplePage')" style="background: #6c757d; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">⬅️ Back to Start</button>
+      <button class="btn-primary" onclick="showPage('finalPage')" style="background: #28a745; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Check My Pitch ➔</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- BUBBLES ---
+  function createBubble() {
+    const container = document.getElementById('bubblesContainer');
+    const bubble = document.createElement('div');
+    bubble.classList.add('bubble');
+    const size = Math.random() * 40 + 20; 
+    bubble.style.width = size + 'px';
+    bubble.style.height = size + 'px';
+    bubble.style.left = Math.random() * 100 + 'vw';
+    container.appendChild(bubble);
+    setTimeout(() => { bubble.remove(); }, 15000);
+  }
+  setInterval(createBubble, 800);
+
+  // --- AUDIO FUNCTION ---
+  function playAudio(word) {
+    if ('speechSynthesis' in window) {
+      const msg = new SpeechSynthesisUtterance(word);
+      msg.lang = 'en-GB'; 
+      window.speechSynthesis.speak(msg);
+    } else {
+      alert("Sorry, your browser doesn't support audio playback.");
+    }
+  }
+
+  // --- DATA ---
+  const stagesData = [
+    {
+      stageName: "Stage 1: Base Colour 🎨",
+      steps: [
+        { type: "pattern", prompt: "How do you want to introduce the base colour?", options: [
+          "This tote bag is designed in a classic [COLOUR].",
+          "The main colour I chose for this bag is [COLOUR].",
+          "I decided to go with a [COLOUR] base for this tote bag."
+        ], var: "[COLOUR]" },
+        { type: "choice", prompt: "What is the colour?", options: ["black", "white"], var: "[COLOUR]" }
+      ]
+    },
+    {
+      stageName: "Stage 2: Personalisation ✍️",
+      steps: [
+        { type: "pattern", prompt: "How do you want to introduce your name?", options: [
+          "It features my name, '[NAME]', on the front.",
+          "To make it unique, I have added '[NAME]' as a personal touch.",
+          "You can see the custom text '[NAME]' printed perfectly on it."
+        ], var: "[NAME]" },
+        { type: "text", prompt: "What is the name printed on it?", var: "[NAME]", placeholder: "Type your name..." }
+      ]
+    },
+    {
+      stageName: "Stage 3: Special Feature 🌟",
+      steps: [
+        { type: "pattern", prompt: "How do you want to introduce the patch/feature?", options: [
+          "One of the key features is a [P_COLOUR] [P_DESIGN] patch.",
+          "To make it stand out, I included a [P_COLOUR] [P_DESIGN].",
+          "My favourite part of the bag is the [P_COLOUR] [P_DESIGN]."
+        ], var: "[P_COLOUR]" }, 
+        { type: "choice", prompt: "What colour is the feature?", options: ["red", "orange", "yellow", "green", "blue", "purple", "pink", "black", "white", "brown"], var: "[P_COLOUR]" },
+        { type: "text", prompt: "What is the design? (e.g. star, cat, flower)", var: "[P_DESIGN]", placeholder: "e.g. star" }
+      ]
+    },
+    {
+      stageName: "Stage 4: Location 📍",
+      steps: [
+        { type: "pattern", prompt: "How do you want to describe its location?", options: [
+          "It is placed [LOCATION].",
+          "You can find it located [LOCATION].",
+          "I decided to put it [LOCATION]."
+        ], var: "[LOCATION]" },
+        { type: "choice", prompt: "Where is it on the bag?", options: ["in the centre", "on the left side", "on the right side", "at the top", "at the bottom", "in the corner"], var: "[LOCATION]" }
+      ]
+    },
+    {
+      stageName: "Stage 5: Reason 🤔",
+      steps: [
+        { type: "pattern", prompt: "How do you want to explain your design choice?", options: [
+          "I chose this design because [REASON].",
+          "This design is special to me because [REASON].",
+          "The reason behind this design is that [REASON]."
+        ], var: "[REASON]" },
+        { type: "text", prompt: "Why did you choose this design?", var: "[REASON]", placeholder: "e.g. it looks energetic" }
+      ]
+    }
+  ];
+
+  let flowSteps = [];
+  stagesData.forEach((stage) => {
+    stage.steps.forEach((step, idx) => {
+      flowSteps.push({ ...step, stageName: stage.stageName, isLastInStage: (idx === stage.steps.length - 1) });
+    });
+  });
+
+  let currentStepIdx = 0;
+  let currentSentence = "";
+  let finalParagraphArr = [];
+
+  // --- NEW MERGE TRANSITION LOGIC ---
+  function showPage(pageId) {
+    const activePage = document.querySelector('.page.active');
+    
+    if (activePage && activePage.id !== pageId) {
+      // Fade out current page with blur
+      activePage.style.opacity = '0';
+      activePage.style.filter = 'blur(10px)';
+      activePage.style.transform = 'scale(0.98)';
+      
+      setTimeout(() => {
+        activePage.classList.remove('active');
+        
+        // Prepare new page
+        const newPage = document.getElementById(pageId);
+        newPage.classList.add('active');
+        window.scrollTo(0, 0); 
+        
+        // Fade in new page
+        setTimeout(() => {
+          newPage.style.opacity = '1';
+          newPage.style.filter = 'blur(0)';
+          newPage.style.transform = 'scale(1)';
+        }, 50); 
+        
+      }, 400); // 400ms match the CSS transition duration
+    } else {
+      const newPage = document.getElementById(pageId);
+      newPage.classList.add('active');
+      setTimeout(() => {
+        newPage.style.opacity = '1';
+        newPage.style.filter = 'blur(0)';
+        newPage.style.transform = 'scale(1)';
+      }, 50);
+    }
+  }
+
+  // Make sure landing page fades in on load
+  window.onload = () => {
+    const landing = document.getElementById('landingPage');
+    setTimeout(() => {
+      landing.style.opacity = '1';
+      landing.style.filter = 'blur(0)';
+      landing.style.transform = 'scale(1)';
+    }, 100);
+  };
+
+  function startWizard() {
+    showPage('wizardPage');
+    renderStep();
+  }
+
+  function updateStorySoFar() {
+    const storyBox = document.getElementById('storyBox');
+    const compText = document.getElementById('completedStory');
+    const currText = document.getElementById('currentStory');
+
+    if (finalParagraphArr.length === 0 && currentSentence === "") {
+      storyBox.style.display = 'none'; return;
+    }
+    
+    storyBox.style.display = 'block';
+    compText.innerText = (finalParagraphArr.length > 0) ? finalParagraphArr.join(' ') + " " : "";
+    
+    if (currentSentence !== "") {
+      let previewHtml = currentSentence.replace(/\[.*?\]/g, '____');
+      currText.innerText = previewHtml;
+    } else {
+      currText.innerText = "";
+    }
+  }
+
+  function renderStep() {
+    const step = flowSteps[currentStepIdx];
+    
+    const progress = (currentStepIdx / flowSteps.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+
+    document.getElementById('stageTitle').innerText = step.stageName;
+    document.getElementById('promptTitle').innerText = step.prompt;
+
+    updateStorySoFar();
+
+    const optionsArea = document.getElementById('optionsArea');
+    optionsArea.innerHTML = ''; 
+
+    if (step.type === 'pattern') {
+      const grid = document.createElement('div');
+      grid.className = 'options-grid';
+      
+      step.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'pattern-btn';
+        const displayHtml = opt.replace(/\[.*?\]/g, '<span class="blank-spot">________</span>');
+        btn.innerHTML = displayHtml;
+        btn.onclick = () => handleInput(opt);
+        grid.appendChild(btn);
+      });
+      optionsArea.appendChild(grid);
+    } 
+    else if (step.type === 'choice') {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'choices-wrapper';
+      
+      step.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = opt; 
+        
+        const basicColours = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'black', 'white', 'brown'];
+        if (basicColours.includes(opt.toLowerCase())) {
+          btn.style.backgroundColor = opt;
+          btn.style.color = (['white', 'yellow', 'pink'].includes(opt.toLowerCase())) ? '#000' : '#fff';
+        }
+
+        btn.onclick = () => handleInput(opt);
+        wrapper.appendChild(btn);
+      });
+      optionsArea.appendChild(wrapper);
+    } 
+    else if (step.type === 'text') {
+      const group = document.createElement('div');
+      group.className = 'input-group';
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'wizardInput';
+      input.placeholder = step.placeholder || "Type here...";
+      
+      const btn = document.createElement('button');
+      btn.className = 'btn-submit';
+      btn.innerText = 'Next Step ➔';
+      
+      btn.onclick = () => {
+        const val = input.value.trim();
+        if(val) handleInput(val);
+        else alert('Please enter something before continuing! ✍️');
+      };
+
+      input.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          btn.click();
+        }
+      });
+
+      group.appendChild(input);
+      group.appendChild(btn);
+      optionsArea.appendChild(group);
+      
+      setTimeout(() => input.focus(), 300);
+    }
+  }
+
+  function fixGrammar(sentence) {
+    return sentence.replace(/\b(a|A)\s+([aeiouAEIOU][a-zA-Z]*)\b/g, function(match, article, word) {
+      if (article === 'a') return 'an ' + word;
+      if (article === 'A') return 'An ' + word;
+    });
+  }
+
+  function handleInput(value) {
+    const step = flowSteps[currentStepIdx];
+
+    if (step.type === 'pattern') {
+      currentSentence = value;
+    } else {
+      let finalValue = value;
+      if (step.var !== '[NAME]') {
+        finalValue = finalValue.toLowerCase();
+      }
+      currentSentence = currentSentence.replace(step.var, finalValue);
+    }
+
+    if (step.isLastInStage) {
+      currentSentence = fixGrammar(currentSentence);
+      finalParagraphArr.push(currentSentence);
+      currentSentence = ""; 
+    }
+
+    currentStepIdx++;
+
+    if (currentStepIdx >= flowSteps.length) {
+      finishWizard();
+    } else {
+      // Wizard internal step transition (Blur Effect)
+      const card = document.getElementById('wizardCard');
+      card.style.opacity = '0';
+      card.style.filter = 'blur(5px)';
+      card.style.transform = 'scale(0.98)';
+      setTimeout(() => {
+        renderStep();
+        card.style.opacity = '1';
+        card.style.filter = 'blur(0)';
+        card.style.transform = 'scale(1)';
+      }, 300);
+    }
+  }
+
+  function finishWizard() {
+    const finalHTML = finalParagraphArr.join(' ');
+    document.getElementById('finalParagraph').innerText = finalHTML;
+    showPage('finalPage');
+  }
+
+  function copyText() {
+    const textToCopy = document.getElementById('finalParagraph').innerText;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.innerText = '✅ Copied!';
+      btn.style.backgroundColor = '#28a745';
+      setTimeout(() => {
+        btn.innerText = '📋 Copy to Clipboard';
+        btn.style.backgroundColor = 'var(--primary)';
+      }, 3000);
+    }).catch(() => {
+      alert('Oops! Unable to copy.');
+    });
+  }
+</script>
+</body>
+</html>
