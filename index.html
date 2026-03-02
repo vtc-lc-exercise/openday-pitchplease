@@ -79,6 +79,9 @@
   
   .btn-secondary { background-color: #f39c12; color: #fff; padding: 15px 30px; font-size: clamp(1.1em, 2vw, 1.3em); box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4); }
   .btn-secondary:hover { background-color: #e67e22; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(243, 156, 18, 0.6); }
+  
+  .btn-back { background-color: #6c757d; color: #fff; padding: 12px 25px; font-size: 1em; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 20px;}
+  .btn-back:hover { background-color: #5a6268; transform: translateY(-2px); }
 
   .card-container { 
     background: var(--bg-card); 
@@ -117,10 +120,11 @@
   .input-group { display: flex; flex-direction: column; gap: 15px; align-items: center; width: 100%; }
   input[type="text"] { width: 90%; max-width: 400px; padding: 15px; font-size: 1.2em; border: 2px solid #ccc; border-radius: 10px; text-align: center; font-family: 'Poppins', sans-serif; }
   input[type="text"]:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 8px rgba(0,123,255,0.3); }
-  .btn-submit { background: var(--secondary); color: white; padding: 12px 30px; font-size: 1.1em; margin-top: 10px; }
+  
+  .action-buttons { display: flex; gap: 10px; justify-content: center; width: 100%; margin-top: 10px; flex-wrap: wrap;}
+  .btn-submit { background: var(--secondary); color: white; padding: 12px 30px; font-size: 1.1em; }
   .btn-submit:hover { background: #0056b3; transform: translateY(-2px); }
 
-  /* Chatbot Wrapper */
   .chatbot-wrapper {
     width: 100%; max-width: 600px; border-radius: 15px; overflow: hidden;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15); border: 2px solid var(--primary);
@@ -189,6 +193,10 @@
       <p style="font-weight: bold; margin: 10px 0;">Or if you are ready to create yours 🤩</p>
       <button class="btn-primary" style="margin-top: 0;" onclick="startWizard()">Let's Start Writing! ✍️</button>
     </div>
+    
+    <div style="text-align: center;">
+      <button class="btn-back" onclick="showPage('landingPage')">⬅️ Back to Home</button>
+    </div>
   </div>
 </div>
 
@@ -209,6 +217,10 @@
     </div>
     
     <div id="optionsArea"></div>
+
+    <!-- WIZARD GLOBAL BACK BUTTON (Appears for Choice/Pattern buttons) -->
+    <div id="wizardBackArea" style="text-align: center; margin-top: 25px;"></div>
+
   </div>
 </div>
 
@@ -305,8 +317,8 @@
     </div>
 
     <div style="text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
-      <button class="btn-primary" onclick="showPage('samplePage')" style="background: #6c757d; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">⬅️ Back to Start</button>
-      <button class="btn-primary" onclick="showPage('finalPage')" style="background: #28a745; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Check My Pitch ➔</button>
+      <button class="btn-back" onclick="showPage('samplePage')">⬅️ Back to Start</button>
+      <button class="btn-primary" onclick="showPage('finalPage')" style="background: #28a745; margin-top:0; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Check My Pitch ➔</button>
     </div>
   </div>
 </div>
@@ -404,6 +416,7 @@
   let currentStepIdx = 0;
   let currentSentence = "";
   let finalParagraphArr = [];
+  let stateHistory = []; // HISTORY ARRAY FOR BACK BUTTON ⏪
 
   function showPage(pageId) {
     const activePage = document.querySelector('.page.active');
@@ -447,6 +460,7 @@
   };
 
   function startWizard() {
+    stateHistory = []; // Reset history
     showPage('wizardPage');
     renderStep();
   }
@@ -483,7 +497,29 @@
     updateStorySoFar();
 
     const optionsArea = document.getElementById('optionsArea');
+    const backArea = document.getElementById('wizardBackArea');
     optionsArea.innerHTML = ''; 
+    backArea.innerHTML = '';
+
+    // WIZARD BACK BUTTON LOGIC
+    if (currentStepIdx > 0 || stateHistory.length > 0) {
+      const backBtn = document.createElement('button');
+      backBtn.className = 'btn-back';
+      backBtn.innerText = '⬅️ Previous Step';
+      backBtn.onclick = goBackStep;
+      
+      // If it's a text input, put it next to Next Step. Otherwise, put it at the bottom.
+      if (step.type !== 'text') {
+        backArea.appendChild(backBtn);
+      }
+    } else {
+      // If it's the very first step, allow going back to sample page
+      const backBtn = document.createElement('button');
+      backBtn.className = 'btn-back';
+      backBtn.innerText = '⬅️ Back to Start';
+      backBtn.onclick = () => showPage('samplePage');
+      backArea.appendChild(backBtn);
+    }
 
     if (step.type === 'pattern') {
       const grid = document.createElement('div');
@@ -523,18 +559,29 @@
       const group = document.createElement('div');
       group.className = 'input-group';
       
-      // 1. Input Box First
       const input = document.createElement('input');
       input.type = 'text';
       input.id = 'wizardInput';
       input.placeholder = step.placeholder || "Type here...";
       
-      // 2. Next Step Button Second
-      const btn = document.createElement('button');
-      btn.className = 'btn-submit';
-      btn.innerText = 'Next Step ➔';
+      const btnActions = document.createElement('div');
+      btnActions.className = 'action-buttons';
       
-      btn.onclick = () => {
+      // If history exists, add back button next to submit
+      if (stateHistory.length > 0) {
+        const backBtn = document.createElement('button');
+        backBtn.className = 'btn-back';
+        backBtn.style.marginTop = '0';
+        backBtn.innerText = '⬅️ Back';
+        backBtn.onclick = goBackStep;
+        btnActions.appendChild(backBtn);
+      }
+
+      const btnSubmit = document.createElement('button');
+      btnSubmit.className = 'btn-submit';
+      btnSubmit.innerText = 'Next Step ➔';
+      
+      btnSubmit.onclick = () => {
         const val = input.value.trim();
         if(val) handleInput(val);
         else alert('Please enter something before continuing! ✍️');
@@ -543,14 +590,15 @@
       input.addEventListener("keypress", function(event) {
         if (event.key === "Enter") {
           event.preventDefault();
-          btn.click();
+          btnSubmit.click();
         }
       });
 
+      btnActions.appendChild(btnSubmit);
+      
       group.appendChild(input);
-      group.appendChild(btn);
+      group.appendChild(btnActions);
 
-      // 3. AI Section Below (Only for REASON stage)
       if (step.var === '[REASON]') {
         const aiHelpText = document.createElement('div');
         aiHelpText.style.marginTop = '35px';
@@ -577,10 +625,29 @@
       
       optionsArea.appendChild(group);
       
-      // Focus behavior
       if (step.var !== '[REASON]') {
         setTimeout(() => input.focus(), 300);
       }
+    }
+  }
+
+  function goBackStep() {
+    if (stateHistory.length > 0) {
+      const prevState = stateHistory.pop();
+      currentStepIdx = prevState.idx;
+      currentSentence = prevState.sentence;
+      finalParagraphArr = [...prevState.arr]; // Restore array copy
+      
+      const card = document.getElementById('wizardCard');
+      card.style.opacity = '0';
+      card.style.filter = 'blur(5px)';
+      card.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        renderStep();
+        card.style.opacity = '1';
+        card.style.filter = 'blur(0)';
+        card.style.transform = 'scale(1)';
+      }, 300);
     }
   }
 
@@ -592,6 +659,13 @@
   }
 
   function handleInput(value) {
+    // SAVE STATE BEFORE MOVING FORWARD ⏩
+    stateHistory.push({
+      idx: currentStepIdx,
+      sentence: currentSentence,
+      arr: [...finalParagraphArr]
+    });
+
     const step = flowSteps[currentStepIdx];
 
     if (step.type === 'pattern') {
