@@ -41,7 +41,6 @@
     100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
   }
 
-  /* --- PAGE TRANSITIONS (MERGE / DISSOLVE EFFECT) --- */
   .page {
     display: none; 
     padding: clamp(20px, 5vw, 40px); 
@@ -81,7 +80,17 @@
   .btn-secondary { background-color: #f39c12; color: #fff; padding: 15px 30px; font-size: clamp(1.1em, 2vw, 1.3em); box-shadow: 0 6px 15px rgba(243, 156, 18, 0.4); }
   .btn-secondary:hover { background-color: #e67e22; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(243, 156, 18, 0.6); }
 
-  .card-container { background: var(--bg-card); border-radius: 20px; padding: clamp(20px, 5vw, 40px); width: 100%; max-width: 750px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); box-sizing: border-box; text-align: left; }
+  .card-container { 
+    background: var(--bg-card); 
+    border-radius: 20px; 
+    padding: clamp(20px, 5vw, 40px); 
+    width: 100%; 
+    max-width: 750px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+    box-sizing: border-box; 
+    text-align: left; 
+    transition: opacity 0.4s ease-in-out, filter 0.4s ease-in-out, transform 0.4s ease-in-out; 
+  }
   .card-container h2 { color: var(--primary); margin-top: 0; text-align: center; font-size: 1.8em; }
 
   .story-so-far { background: #fdfdfd; border: 2px dashed #ccc; border-radius: 12px; padding: 15px 20px; margin-bottom: 25px; font-size: 1.1em; line-height: 1.6; color: #555; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
@@ -105,15 +114,25 @@
   .choice-btn { padding: 12px 20px; font-size: 1.1em; border-radius: 8px; border: 2px solid rgba(0,0,0,0.1); background: #fff; color: #333; font-weight: 600; min-width: 100px; }
   .choice-btn:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
-  .input-group { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+  .input-group { display: flex; flex-direction: column; gap: 15px; align-items: center; width: 100%; }
   input[type="text"] { width: 90%; max-width: 400px; padding: 15px; font-size: 1.2em; border: 2px solid #ccc; border-radius: 10px; text-align: center; font-family: 'Poppins', sans-serif; }
   input[type="text"]:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 8px rgba(0,123,255,0.3); }
   .btn-submit { background: var(--secondary); color: white; padding: 12px 30px; font-size: 1.1em; margin-top: 10px; }
   .btn-submit:hover { background: #0056b3; transform: translateY(-2px); }
 
+  /* Chatbot Wrapper */
+  .chatbot-wrapper {
+    width: 100%; max-width: 600px; border-radius: 15px; overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15); border: 2px solid var(--primary);
+    margin: 10px 0 25px 0; background: #fff;
+  }
+  .chatbot-header {
+    background: var(--primary); color: #fff; padding: 12px; text-align: center;
+    font-weight: bold; font-size: 1.1em; letter-spacing: 1px;
+  }
+
   #finalParagraph { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); font-size: clamp(1.1em, 2vw, 1.3em); line-height: 1.8; color: #333; width: 100%; box-sizing: border-box; text-align: left; margin-bottom: 25px; border-left: 8px solid var(--primary); word-wrap: break-word; }
 
-  /* --- EXPRESSIONS PAGE STYLES --- */
   .exp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
   .exp-card { background: #fff; padding: 25px; border-radius: 12px; border-top: 5px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
   .exp-card h3 { margin-top: 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 1.2em; display: flex; align-items: center; gap: 8px; }
@@ -293,7 +312,6 @@
 </div>
 
 <script>
-  // --- BUBBLES ---
   function createBubble() {
     const container = document.getElementById('bubblesContainer');
     const bubble = document.createElement('div');
@@ -307,7 +325,6 @@
   }
   setInterval(createBubble, 800);
 
-  // --- AUDIO FUNCTION ---
   function playAudio(word) {
     if ('speechSynthesis' in window) {
       const msg = new SpeechSynthesisUtterance(word);
@@ -318,7 +335,6 @@
     }
   }
 
-  // --- DATA ---
   const stagesData = [
     {
       stageName: "Stage 1: Base Colour 🎨",
@@ -389,12 +405,10 @@
   let currentSentence = "";
   let finalParagraphArr = [];
 
-  // --- NEW MERGE TRANSITION LOGIC ---
   function showPage(pageId) {
     const activePage = document.querySelector('.page.active');
     
     if (activePage && activePage.id !== pageId) {
-      // Fade out current page with blur
       activePage.style.opacity = '0';
       activePage.style.filter = 'blur(10px)';
       activePage.style.transform = 'scale(0.98)';
@@ -402,19 +416,16 @@
       setTimeout(() => {
         activePage.classList.remove('active');
         
-        // Prepare new page
         const newPage = document.getElementById(pageId);
         newPage.classList.add('active');
         window.scrollTo(0, 0); 
         
-        // Fade in new page
         setTimeout(() => {
           newPage.style.opacity = '1';
           newPage.style.filter = 'blur(0)';
           newPage.style.transform = 'scale(1)';
         }, 50); 
-        
-      }, 400); // 400ms match the CSS transition duration
+      }, 400); 
     } else {
       const newPage = document.getElementById(pageId);
       newPage.classList.add('active');
@@ -426,7 +437,6 @@
     }
   }
 
-  // Make sure landing page fades in on load
   window.onload = () => {
     const landing = document.getElementById('landingPage');
     setTimeout(() => {
@@ -513,11 +523,13 @@
       const group = document.createElement('div');
       group.className = 'input-group';
       
+      // 1. Input Box First
       const input = document.createElement('input');
       input.type = 'text';
       input.id = 'wizardInput';
       input.placeholder = step.placeholder || "Type here...";
       
+      // 2. Next Step Button Second
       const btn = document.createElement('button');
       btn.className = 'btn-submit';
       btn.innerText = 'Next Step ➔';
@@ -537,9 +549,38 @@
 
       group.appendChild(input);
       group.appendChild(btn);
+
+      // 3. AI Section Below (Only for REASON stage)
+      if (step.var === '[REASON]') {
+        const aiHelpText = document.createElement('div');
+        aiHelpText.style.marginTop = '35px';
+        aiHelpText.style.marginBottom = '5px';
+        aiHelpText.style.fontWeight = 'bold';
+        aiHelpText.style.color = '#888';
+        aiHelpText.style.fontSize = '0.95em';
+        aiHelpText.innerText = '💡 No ideas? You can also seek help from the AI chatbot below:';
+        group.appendChild(aiHelpText);
+
+        const chatbotBox = document.createElement('div');
+        chatbotBox.className = 'chatbot-wrapper';
+        
+        chatbotBox.innerHTML = `
+          <div class="chatbot-header">🤖 Reason Coach: Let me help you brainstorm!</div>
+          <iframe src="https://app.edcafe.ai/chatbots/69a55350149461c9c155c027" 
+                  title="Pitch Assistant" 
+                  allow="microphone" 
+                  style="border: none; width: 100%; height: 500px; display: block;">
+          </iframe>
+        `;
+        group.appendChild(chatbotBox);
+      }
+      
       optionsArea.appendChild(group);
       
-      setTimeout(() => input.focus(), 300);
+      // Focus behavior
+      if (step.var !== '[REASON]') {
+        setTimeout(() => input.focus(), 300);
+      }
     }
   }
 
@@ -574,7 +615,6 @@
     if (currentStepIdx >= flowSteps.length) {
       finishWizard();
     } else {
-      // Wizard internal step transition (Blur Effect)
       const card = document.getElementById('wizardCard');
       card.style.opacity = '0';
       card.style.filter = 'blur(5px)';
